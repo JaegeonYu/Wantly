@@ -11,43 +11,43 @@ class OwnedItem with _$OwnedItem {
   const factory OwnedItem({
     /// 고유 ID
     @HiveField(0) required String id,
-    
+
     /// 물품명
     @HiveField(1) required String name,
-    
+
     /// 실제 구매 가격 (원 단위)
     @HiveField(2) required int actualPrice,
-    
+
     /// 예상 가격 (위시리스트에 있을 때)
     @HiveField(3) int? expectedPrice,
-    
+
     /// 이미지 경로 (로컬 저장소)
     @HiveField(4) String? imageUrl,
-    
+
     /// 카테고리 ID
     @HiveField(5) required String categoryId,
-    
+
     /// 구매 날짜
     @HiveField(6) required DateTime purchaseDate,
-    
+
     /// 만족도 점수 (1.0 ~ 5.0)
     @HiveField(7) @Default(3.0) double satisfactionScore,
-    
+
     /// 만족도 순위 (드래그앤드롭용, 숫자가 작을수록 높음)
     @HiveField(8) @Default(0) int satisfactionRank,
-    
+
     /// 구매 후기
     @HiveField(9) @Default('') String review,
-    
+
     /// 다시 사고 싶은지 여부
     @HiveField(10) @Default(false) bool wouldBuyAgain,
-    
+
     /// 태그 목록
     @HiveField(11) @Default([]) List<String> tags,
-    
+
     /// 생성 날짜 (위시리스트에 등록된 날짜)
     @HiveField(12) DateTime? createdAt,
-    
+
     /// 메모
     @HiveField(13) @Default('') String memo,
   }) = _OwnedItem;
@@ -60,19 +60,13 @@ class OwnedItem with _$OwnedItem {
 extension OwnedItemExtension on OwnedItem {
   /// 가격 포맷팅 (예: ₩1,200,000)
   String get formattedPrice {
-    return '₩${actualPrice.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
-    )}';
+    return '₩${actualPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}';
   }
 
   /// 예상 가격 포맷팅
   String? get formattedExpectedPrice {
     if (expectedPrice == null) return null;
-    return '₩${expectedPrice.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]},',
-    )}';
+    return '₩${expectedPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}';
   }
 
   /// 가격 차이 (실제 - 예상)
@@ -116,8 +110,4 @@ extension OwnedItemExtension on OwnedItem {
 }
 
 /// 만족도 레벨
-enum SatisfactionLevel {
-  high,
-  medium,
-  low,
-}
+enum SatisfactionLevel { high, medium, low }
