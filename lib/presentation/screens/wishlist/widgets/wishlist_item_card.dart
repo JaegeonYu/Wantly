@@ -6,13 +6,22 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../../../data/models/wishlist_item.dart';
 import '../../../providers/wishlist_provider.dart';
+import '../add_edit_wishlist_screen.dart';
 
 /// 위시리스트 아이템 카드
 class WishlistItemCard extends StatelessWidget {
   final WishlistItem item;
   final int rank;
+  final bool showDragHandle;
+  final int? dragIndex; // ReorderableListView에서 사용할 인덱스
 
-  const WishlistItemCard({super.key, required this.item, required this.rank});
+  const WishlistItemCard({
+    super.key,
+    required this.item,
+    required this.rank,
+    this.showDragHandle = false,
+    this.dragIndex,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +34,13 @@ class WishlistItemCard extends StatelessWidget {
           children: [
             // 편집
             SlidableAction(
-              onPressed: (_) {
-                // TODO: 편집 화면으로 이동
+              onPressed: (_) async {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddEditWishlistScreen(item: item),
+                  ),
+                );
               },
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.white,
@@ -105,8 +119,25 @@ class WishlistItemCard extends StatelessWidget {
                     ),
                   ),
 
-                  // 드래그 핸들
-                  const Icon(Icons.drag_handle, color: AppColors.grey400),
+                  // 드래그 핸들 (순서 변경 시에만 표시)
+                  if (showDragHandle && dragIndex != null)
+                    ReorderableDragStartListener(
+                      index: dragIndex!,
+                      child: Container(
+                        padding: const EdgeInsets.all(AppSizes.spaceXs),
+                        decoration: BoxDecoration(
+                          color: AppColors.grey100,
+                          borderRadius: BorderRadius.circular(
+                            AppSizes.radiusSm,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.drag_handle,
+                          color: AppColors.grey600,
+                          size: 24,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),

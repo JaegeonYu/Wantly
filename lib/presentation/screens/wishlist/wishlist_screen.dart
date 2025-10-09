@@ -7,6 +7,7 @@ import '../../../core/theme/text_styles.dart';
 import '../../providers/wishlist_provider.dart';
 import 'widgets/wishlist_item_card.dart';
 import 'widgets/empty_wishlist_widget.dart';
+import 'add_edit_wishlist_screen.dart';
 
 /// 위시리스트 화면
 class WishlistScreen extends StatefulWidget {
@@ -99,12 +100,15 @@ class _WishlistScreenState extends State<WishlistScreen> {
             padding: const EdgeInsets.all(AppSizes.paddingSm),
             itemCount: provider.items.length,
             onReorder: provider.reorderItems,
+            buildDefaultDragHandles: false, // 기본 드래그 핸들 비활성화
             itemBuilder: (context, index) {
               final item = provider.items[index];
               return WishlistItemCard(
                 key: ValueKey(item.id),
                 item: item,
                 rank: index + 1,
+                showDragHandle: true,
+                dragIndex: index, // 드래그 핸들에서 사용할 인덱스
               );
             },
           );
@@ -112,7 +116,13 @@ class _WishlistScreenState extends State<WishlistScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // TODO: 아이템 추가 화면으로 이동
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AddEditWishlistScreen(),
+            ),
+          );
+          // 아이템 추가 후 돌아왔을 때 자동으로 리스트 갱신됨 (Provider 사용)
         },
         icon: const Icon(Icons.add),
         label: const Text(AppStrings.addItem),
