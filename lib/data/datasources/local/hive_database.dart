@@ -1,5 +1,8 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import '../../../core/utils/logger.dart';
+import '../../models/category.dart';
+import '../../models/wishlist_item.dart';
+import '../../models/owned_item.dart';
 
 /// Hive 데이터베이스 초기화 및 관리
 class HiveDatabase {
@@ -19,11 +22,28 @@ class HiveDatabase {
       // Hive 초기화
       await Hive.initFlutter();
 
+      // TypeAdapter 등록
+      _registerAdapters();
+
       AppLogger.i('✅ Hive 초기화 완료');
     } catch (e, stackTrace) {
       AppLogger.e('❌ Hive 초기화 실패', e, stackTrace);
       rethrow;
     }
+  }
+
+  /// TypeAdapter 등록
+  static void _registerAdapters() {
+    if (!Hive.isAdapterRegistered(0)) {
+      Hive.registerAdapter(CategoryAdapter());
+    }
+    if (!Hive.isAdapterRegistered(1)) {
+      Hive.registerAdapter(WishlistItemAdapter());
+    }
+    if (!Hive.isAdapterRegistered(2)) {
+      Hive.registerAdapter(OwnedItemAdapter());
+    }
+    AppLogger.i('📝 TypeAdapter 등록 완료');
   }
 
   /// 모든 Box 열기
