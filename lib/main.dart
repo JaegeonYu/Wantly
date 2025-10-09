@@ -5,7 +5,8 @@ import 'core/utils/logger.dart';
 import 'data/datasources/local/hive_database.dart';
 import 'data/repositories/category_repository_impl.dart';
 import 'presentation/providers/wishlist_provider.dart';
-import 'presentation/screens/wishlist/wishlist_screen.dart';
+import 'presentation/providers/owned_provider.dart';
+import 'presentation/screens/home/home_screen.dart';
 
 void main() async {
   // Flutter 바인딩 초기화
@@ -42,14 +43,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => WishlistProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => WishlistProvider()),
+        ChangeNotifierProvider(create: (_) => OwnedProvider()),
+      ],
       child: MaterialApp(
         title: 'WANTLY',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.light,
-        home: const WishlistScreen(),
+        home: const HomeScreen(),
       ),
     );
   }

@@ -58,21 +58,34 @@ class OwnedItem with _$OwnedItem {
 
 /// OwnedItem 확장 메서드
 extension OwnedItemExtension on OwnedItem {
-  /// 가격 포맷팅 (예: ₩1,200,000)
-  String get formattedPrice {
+  /// 실제 가격 포맷팅 (예: ₩1,200,000)
+  String get formattedActualPrice {
     return '₩${actualPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}';
   }
 
+  /// 가격 포맷팅 (예: ₩1,200,000) - 호환성
+  String get formattedPrice {
+    return formattedActualPrice;
+  }
+
   /// 예상 가격 포맷팅
-  String? get formattedExpectedPrice {
-    if (expectedPrice == null) return null;
+  String get formattedEstimatedPrice {
+    if (expectedPrice == null) return '';
     return '₩${expectedPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}';
   }
 
   /// 가격 차이 (실제 - 예상)
-  int? get priceDifference {
-    if (expectedPrice == null) return null;
+  int get priceDifference {
+    if (expectedPrice == null) return 0;
     return actualPrice - expectedPrice!;
+  }
+
+  /// 가격 차이 포맷팅
+  String get formattedPriceDifference {
+    final diff = priceDifference.abs();
+    final formatted =
+        '₩${diff.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}';
+    return priceDifference > 0 ? '+$formatted' : '-$formatted';
   }
 
   /// 예상보다 저렴했는지
@@ -82,8 +95,13 @@ extension OwnedItemExtension on OwnedItem {
   }
 
   /// 구매 후 경과 일수
-  int get daysSincePurchase {
+  int get purchasedDaysAgo {
     return DateTime.now().difference(purchaseDate).inDays;
+  }
+
+  /// 구매 후 경과 일수 (호환성)
+  int get daysSincePurchase {
+    return purchasedDaysAgo;
   }
 
   /// 위시리스트에 있던 기간 (일)
