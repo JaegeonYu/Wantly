@@ -24,6 +24,8 @@ class Category with _$Category {
 /// Category 확장 메서드
 extension CategoryExtension on Category {
   /// IconData 가져오기
+  /// @pragma를 사용하여 tree shaking에서 제외
+  @pragma('vm:entry-point')
   IconData get icon => IconData(iconCode, fontFamily: 'MaterialIcons');
 
   /// Color 가져오기

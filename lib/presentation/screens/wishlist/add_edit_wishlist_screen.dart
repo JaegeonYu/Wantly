@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -86,11 +88,54 @@ class _AddEditWishlistScreenState extends State<AddEditWishlistScreen> {
     super.dispose();
   }
 
-  /// 이미지 선택
+  /// 이미지 선택 옵션 표시
   Future<void> _pickImage() async {
+    // 갤러리와 카메라 중 선택
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(AppSizes.paddingLg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('이미지 선택', style: AppTextStyles.h3),
+            const SizedBox(height: AppSizes.spaceMd),
+            ListTile(
+              leading: const Icon(
+                Icons.photo_library,
+                color: AppColors.primary,
+              ),
+              title: const Text('갤러리에서 선택'),
+              onTap: () => Navigator.pop(context, ImageSource.gallery),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: AppColors.primary),
+              title: const Text('카메라로 촬영'),
+              onTap: () => Navigator.pop(context, ImageSource.camera),
+            ),
+            const SizedBox(height: AppSizes.spaceSm),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('취소'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) return;
+
+    await _selectImage(source);
+  }
+
+  /// 이미지 선택 처리
+  Future<void> _selectImage(ImageSource source) async {
     try {
       final XFile? image = await _imagePicker.pickImage(
-        source: ImageSource.gallery,
+        source: source,
         maxWidth: 1024,
         maxHeight: 1024,
         imageQuality: 85,
@@ -99,12 +144,20 @@ class _AddEditWishlistScreenState extends State<AddEditWishlistScreen> {
         setState(() {
           _imageUrl = image.path;
         });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('이미지가 선택되었습니다'),
+              duration: Duration(seconds: 1),
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('이미지를 선택할 수 없습니다')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('이미지를 선택할 수 없습니다: ${e.toString()}')),
+        );
       }
     }
   }
@@ -386,17 +439,7 @@ class _AddEditWishlistScreenState extends State<AddEditWishlistScreen> {
                   // 이미지 표시
                   ClipRRect(
                     borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                    child: Image.network(
-                      _imageUrl!,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Center(
-                          child: Icon(Icons.broken_image, size: 48),
-                        );
-                      },
-                    ),
+                    child: _buildImage(_imageUrl!),
                   ),
                   // 변경 버튼
                   Positioned(
@@ -435,5 +478,50 @@ class _AddEditWishlistScreenState extends State<AddEditWishlistScreen> {
               ),
       ),
     );
+  }
+
+  /// 이미지 빌드 (로컬 파일 또는 네트워크 URL 처리)
+  Widget _buildImage(String imagePath) {
+    // URL인지 로컬 파일인지 확인
+    final isUrl =
+        imagePath.startsWith('http://') || imagePath.startsWith('https://');
+
+    if (isUrl) {
+      // 네트워크 이미지
+      return Image.network(
+        imagePath,
+        width: double.infinity,
+        height: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const Center(child: Icon(Icons.broken_image, size: 48));
+        },
+      );
+    } else {
+      // 로컬 파일 이미지
+      if (kIsWeb) {
+        // 웹 환경에서는 네트워크 이미지로 처리
+        return Image.network(
+          imagePath,
+          width: double.infinity,
+          height: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Center(child: Icon(Icons.broken_image, size: 48));
+          },
+        );
+      } else {
+        // 모바일 환경에서는 파일 이미지로 처리
+        return Image.file(
+          File(imagePath),
+          width: double.infinity,
+          height: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Center(child: Icon(Icons.broken_image, size: 48));
+          },
+        );
+      }
+    }
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:provider/provider.dart';
@@ -186,13 +188,42 @@ class OwnedItemCard extends StatelessWidget {
     return AspectRatio(
       aspectRatio: 16 / 9,
       child: item.hasImage
-          ? Image.network(
-              item.imageUrl!,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => _buildPlaceholder(),
-            )
+          ? _buildImageWidget(item.imageUrl!)
           : _buildPlaceholder(),
     );
+  }
+
+  /// 이미지 위젯 빌드 (로컬 파일 또는 네트워크 URL 처리)
+  Widget _buildImageWidget(String imagePath) {
+    // URL인지 로컬 파일인지 확인
+    final isUrl =
+        imagePath.startsWith('http://') || imagePath.startsWith('https://');
+
+    if (isUrl) {
+      // 네트워크 이미지
+      return Image.network(
+        imagePath,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _buildPlaceholder(),
+      );
+    } else {
+      // 로컬 파일 이미지
+      if (kIsWeb) {
+        // 웹 환경에서는 네트워크 이미지로 처리
+        return Image.network(
+          imagePath,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildPlaceholder(),
+        );
+      } else {
+        // 모바일 환경에서는 파일 이미지로 처리
+        return Image.file(
+          File(imagePath),
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildPlaceholder(),
+        );
+      }
+    }
   }
 
   /// 플레이스홀더
