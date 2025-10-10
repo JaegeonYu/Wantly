@@ -40,25 +40,18 @@ class _OwnedScreenState extends State<OwnedScreen> {
                   if (snapshot.hasData && provider.itemCount > 0) {
                     final data = snapshot.data!;
                     return Padding(
-                      padding: const EdgeInsets.all(AppSizes.paddingMd),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            '총 ${provider.itemCount}개',
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppColors.textSecondary,
-                            ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSizes.paddingMd,
+                        vertical: 4,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${provider.itemCount}개 · ⭐ ${data['avgSatisfaction'].toStringAsFixed(1)}',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w600,
                           ),
-                          Text(
-                            '평균 ⭐ ${data['avgSatisfaction'].toStringAsFixed(1)}',
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppColors.warning,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
                     );
                   }
