@@ -6,6 +6,7 @@ import 'data/datasources/local/hive_database.dart';
 import 'data/repositories/category_repository_impl.dart';
 import 'presentation/providers/wishlist_provider.dart';
 import 'presentation/providers/owned_provider.dart';
+import 'presentation/providers/insight_provider.dart';
 import 'presentation/screens/home/home_screen.dart';
 
 void main() async {
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => WishlistProvider()),
         ChangeNotifierProvider(create: (_) => OwnedProvider()),
+        ChangeNotifierProvider(create: (_) => InsightProvider()),
       ],
       child: MaterialApp(
         title: 'WANTLY',

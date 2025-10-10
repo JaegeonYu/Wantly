@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/constants/app_colors.dart';
 import '../wishlist/wishlist_screen.dart';
 import '../owned/owned_screen.dart';
+import '../insight/insight_screen.dart';
 
 /// 홈 화면 (탭 네비게이션)
 class HomeScreen extends StatefulWidget {
@@ -14,7 +15,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = const [WishlistScreen(), OwnedScreen()];
+  final List<Widget> _screens = const [
+    WishlistScreen(),
+    OwnedScreen(),
+    InsightScreen(),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +44,11 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.shopping_bag_outlined),
             activeIcon: Icon(Icons.shopping_bag),
             label: '구매 목록',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.insights_outlined),
+            activeIcon: Icon(Icons.insights),
+            label: '인사이트',
           ),
         ],
       ),
