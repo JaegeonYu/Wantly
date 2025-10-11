@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'core/theme/app_theme.dart';
 import 'core/utils/logger.dart';
 import 'data/datasources/local/hive_database.dart';
@@ -11,10 +12,16 @@ import 'presentation/screens/home/home_screen.dart';
 
 void main() async {
   // Flutter 바인딩 초기화
-  WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
+  // 스플래시 화면 유지
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
   // Hive 데이터베이스 초기화
   await _initializeApp();
+
+  // 스플래시 화면 제거
+  FlutterNativeSplash.remove();
 
   runApp(const MyApp());
 }
