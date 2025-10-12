@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'core/theme/app_theme.dart';
@@ -16,6 +17,9 @@ void main() async {
 
   // 스플래시 화면 유지
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+
+  // 세로 고정
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   // Hive 데이터베이스 초기화
   await _initializeApp();

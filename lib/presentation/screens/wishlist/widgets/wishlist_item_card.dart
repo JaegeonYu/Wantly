@@ -253,77 +253,127 @@ class WishlistItemCard extends StatelessWidget {
   /// 구매 완료 다이얼로그
   void _showPurchaseDialog(BuildContext context) {
     final priceController = TextEditingController(text: item.price.toString());
+    double satisfactionScore = 3.0; // 기본값 3점
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('구매 완료'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('${item.name}을(를) 구매하셨나요?'),
-            const SizedBox(height: AppSizes.spaceMd),
-            TextField(
-              controller: priceController,
-              decoration: const InputDecoration(
-                labelText: '실제 구매 가격',
-                suffixText: '원',
-                prefixIcon: Icon(Icons.attach_money),
-              ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('구매 완료'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${item.name}을(를) 구매하셨나요?'),
+                const SizedBox(height: AppSizes.spaceMd),
+                
+                // 실제 구매 가격 입력
+                TextField(
+                  controller: priceController,
+                  decoration: const InputDecoration(
+                    labelText: '실제 구매 가격',
+                    suffixText: '원',
+                    prefixIcon: Icon(Icons.attach_money),
+                  ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                ),
+                const SizedBox(height: AppSizes.spaceLg),
+                
+                // 만족도 별점
+                const Text(
+                  '만족도',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: AppSizes.spaceSm),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(5, (index) {
+                    final starValue = index + 1.0;
+                    return IconButton(
+                      icon: Icon(
+                        starValue <= satisfactionScore
+                            ? Icons.star
+                            : Icons.star_border,
+                        color: AppColors.starColor,
+                        size: 36,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          satisfactionScore = starValue;
+                        });
+                      },
+                    );
+                  }),
+                ),
+                Center(
+                  child: Text(
+                    '${satisfactionScore.toStringAsFixed(1)}점',
+                    style: AppTextStyles.h4.copyWith(
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('취소'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final actualPrice = int.tryParse(priceController.text);
+                if (actualPrice == null || actualPrice <= 0) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(const SnackBar(content: Text('올바른 가격을 입력해주세요')));
+                  return;
+                }
+
+                Navigator.pop(context);
+
+                // OwnedItem으로 변환 (예상 가격과 생성일 포함)
+                final ownedItem = OwnedItem(
+                  id: const Uuid().v4(),
+                  name: item.name,
+                  categoryId: item.categoryId,
+                  actualPrice: actualPrice,
+                  expectedPrice: item.price, // 위시리스트의 예상 가격
+                  imageUrl: item.imageUrl,
+                  purchaseDate: DateTime.now(),
+                  satisfactionScore: satisfactionScore, // 입력받은 별점
+                  createdAt: item.createdAt, // 위시리스트 등록 날짜
+                  review: '',
+                  tags: item.tags,
+                  memo: item.memo,
+                );
+
+                // Owned에 추가
+                final ownedSuccess = await context.read<OwnedProvider>().addItem(
+                  ownedItem,
+                );
+
+                if (ownedSuccess) {
+                  // Wishlist에서 삭제
+                  await context.read<WishlistProvider>().deleteItem(item.id);
+
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('구매 완료되었습니다! 🎉')),
+                    );
+                  }
+                }
+              },
+              child: const Text('완료'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('취소'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final actualPrice = int.tryParse(priceController.text);
-              if (actualPrice == null || actualPrice <= 0) {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('올바른 가격을 입력해주세요')));
-                return;
-              }
-
-              Navigator.pop(context);
-
-              // OwnedItem으로 변환
-              final ownedItem = OwnedItem(
-                id: const Uuid().v4(),
-                name: item.name,
-                categoryId: item.categoryId,
-                actualPrice: actualPrice,
-                imageUrl: item.imageUrl,
-                purchaseDate: DateTime.now(),
-                satisfactionScore: 0, // 초기값, 나중에 수정 가능
-                review: '',
-              );
-
-              // Owned에 추가
-              final ownedSuccess = await context.read<OwnedProvider>().addItem(
-                ownedItem,
-              );
-
-              if (ownedSuccess) {
-                // Wishlist에서 삭제
-                await context.read<WishlistProvider>().deleteItem(item.id);
-
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('구매 완료되었습니다! 🎉')),
-                  );
-                }
-              }
-            },
-            child: const Text('완료'),
-          ),
-        ],
       ),
     );
   }
