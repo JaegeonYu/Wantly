@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
+import '../../providers/insight_provider.dart';
+import '../../providers/owned_provider.dart';
+import '../../providers/wishlist_provider.dart';
 import '../wishlist/wishlist_screen.dart';
 import '../owned/owned_screen.dart';
 import '../insight/insight_screen.dart';
@@ -31,6 +35,9 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             _currentIndex = index;
           });
+
+          // 탭 전환 시 데이터 갱신
+          _refreshTabData(index);
         },
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.grey500,
@@ -53,5 +60,20 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  /// 탭 전환 시 데이터 갱신
+  void _refreshTabData(int index) {
+    switch (index) {
+      case 0: // 위시리스트
+        context.read<WishlistProvider>().loadItems();
+        break;
+      case 1: // 구매 목록
+        context.read<OwnedProvider>().loadItems();
+        break;
+      case 2: // 인사이트
+        context.read<InsightProvider>().loadData();
+        break;
+    }
   }
 }

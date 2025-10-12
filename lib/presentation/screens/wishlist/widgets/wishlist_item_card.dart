@@ -12,6 +12,7 @@ import '../../../../data/models/wishlist_item.dart';
 import '../../../../data/models/owned_item.dart';
 import '../../../providers/wishlist_provider.dart';
 import '../../../providers/owned_provider.dart';
+import '../../../providers/insight_provider.dart';
 import '../add_edit_wishlist_screen.dart';
 
 /// 위시리스트 아이템 카드
@@ -49,12 +50,17 @@ class WishlistItemCard extends StatelessWidget {
             // 편집
             SlidableAction(
               onPressed: (_) async {
-                await Navigator.push(
+                final result = await Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => AddEditWishlistScreen(item: item),
                   ),
                 );
+
+                // 수정 후 리스트 갱신 (명시적으로 리프레시)
+                if (result == true && context.mounted) {
+                  await context.read<WishlistProvider>().loadItems();
+                }
               },
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.white,
@@ -267,7 +273,7 @@ class WishlistItemCard extends StatelessWidget {
               children: [
                 Text('${item.name}을(를) 구매하셨나요?'),
                 const SizedBox(height: AppSizes.spaceMd),
-                
+
                 // 실제 구매 가격 입력
                 TextField(
                   controller: priceController,
@@ -280,14 +286,11 @@ class WishlistItemCard extends StatelessWidget {
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 ),
                 const SizedBox(height: AppSizes.spaceLg),
-                
+
                 // 만족도 별점
                 const Text(
                   '만족도',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: AppSizes.spaceSm),
                 Row(
@@ -313,9 +316,7 @@ class WishlistItemCard extends StatelessWidget {
                 Center(
                   child: Text(
                     '${satisfactionScore.toStringAsFixed(1)}점',
-                    style: AppTextStyles.h4.copyWith(
-                      color: AppColors.primary,
-                    ),
+                    style: AppTextStyles.h4.copyWith(color: AppColors.primary),
                   ),
                 ),
               ],
@@ -330,9 +331,9 @@ class WishlistItemCard extends StatelessWidget {
               onPressed: () async {
                 final actualPrice = int.tryParse(priceController.text);
                 if (actualPrice == null || actualPrice <= 0) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('올바른 가격을 입력해주세요')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('올바른 가격을 입력해주세요')),
+                  );
                   return;
                 }
 
@@ -355,13 +356,18 @@ class WishlistItemCard extends StatelessWidget {
                 );
 
                 // Owned에 추가
-                final ownedSuccess = await context.read<OwnedProvider>().addItem(
-                  ownedItem,
-                );
+                final ownedSuccess = await context
+                    .read<OwnedProvider>()
+                    .addItem(ownedItem);
 
                 if (ownedSuccess) {
                   // Wishlist에서 삭제
                   await context.read<WishlistProvider>().deleteItem(item.id);
+
+                  // 인사이트 Provider 갱신 (즉시 반영)
+                  if (context.mounted) {
+                    await context.read<InsightProvider>().loadData();
+                  }
 
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(

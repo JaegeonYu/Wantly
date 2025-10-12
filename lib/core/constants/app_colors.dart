@@ -44,6 +44,7 @@ class AppColors {
   static const Color satisfactionHigh = Color(0xFF51CF66); // 높음 - 초록색
   static const Color satisfactionMedium = Color(0xFFFFD43B); // 중간 - 노란색
   static const Color satisfactionLow = Color(0xFFFF6B6B); // 낮음 - 빨간색
+  static const Color starColor = Color(0xFFFFD43B); // 별점 - 노란색
 
   // ========== Neutral Colors ==========
   static const Color white = Color(0xFFFFFFFF);
