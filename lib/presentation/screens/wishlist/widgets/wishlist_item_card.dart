@@ -14,6 +14,7 @@ import '../../../providers/wishlist_provider.dart';
 import '../../../providers/owned_provider.dart';
 import '../../../providers/insight_provider.dart';
 import '../add_edit_wishlist_screen.dart';
+import '../wishlist_detail_screen.dart';
 
 /// 위시리스트 아이템 카드
 class WishlistItemCard extends StatelessWidget {
@@ -81,7 +82,13 @@ class WishlistItemCard extends StatelessWidget {
           elevation: 2,
           child: InkWell(
             onTap: () {
-              // TODO: 상세 화면으로 이동
+              // 상세 화면으로 이동
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => WishlistDetailScreen(item: item),
+                ),
+              );
             },
             borderRadius: BorderRadius.circular(AppSizes.radiusMd),
             child: Padding(

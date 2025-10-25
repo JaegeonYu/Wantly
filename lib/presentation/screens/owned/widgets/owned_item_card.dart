@@ -9,6 +9,7 @@ import '../../../../core/constants/app_sizes.dart';
 import '../../../../core/theme/text_styles.dart';
 import '../../../../data/models/owned_item.dart';
 import '../../../providers/owned_provider.dart';
+import '../owned_detail_screen.dart';
 
 /// 구매 완료 아이템 카드
 class OwnedItemCard extends StatelessWidget {
@@ -26,15 +27,21 @@ class OwnedItemCard extends StatelessWidget {
         endActionPane: ActionPane(
           motion: const ScrollMotion(),
           children: [
-            // 편집
+            // 상세보기
             SlidableAction(
               onPressed: (_) {
-                // TODO: 상세/편집 화면으로 이동
+                // 상세 화면으로 이동
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => OwnedDetailScreen(item: item),
+                  ),
+                );
               },
               backgroundColor: AppColors.primary,
               foregroundColor: AppColors.white,
-              icon: Icons.edit,
-              label: '편집',
+              icon: Icons.info,
+              label: '상세',
             ),
             // 삭제
             SlidableAction(
@@ -51,7 +58,13 @@ class OwnedItemCard extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: () {
-              // TODO: 상세 화면으로 이동
+              // 상세 화면으로 이동
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => OwnedDetailScreen(item: item),
+                ),
+              );
             },
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,12 +106,14 @@ class OwnedItemCard extends StatelessWidget {
                       const SizedBox(height: AppSizes.spaceXs),
 
                       // 별점
-                      RatingBarIndicator(
-                        rating: item.satisfactionScore.toDouble(),
-                        itemBuilder: (context, index) =>
-                            const Icon(Icons.star, color: AppColors.warning),
-                        itemCount: 5,
-                        itemSize: 20.0,
+                      IgnorePointer(
+                        child: RatingBarIndicator(
+                          rating: item.satisfactionScore.toDouble(),
+                          itemBuilder: (context, index) =>
+                              const Icon(Icons.star, color: AppColors.warning),
+                          itemCount: 5,
+                          itemSize: 20.0,
+                        ),
                       ),
                       const SizedBox(height: AppSizes.spaceXs),
 
